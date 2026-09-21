@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPH Calculator</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f2f2f7;
+        color: #111;
+    }
+
+    .app {
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-top: 14px;
+        margin-bottom: 6px;
+    }
+
+    input {
+        width: 100%;
+        padding: 13px;
+        font-size: 17px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+    }
+
+    button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        background: #007aff;
+        color: white;
+    }
+
+    button:active {
+        opacity: 0.7;
+    }
+
+    .result {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail:last-child {
+        border-bottom: none;
+    }
+
+    .error {
+        color: #d00;
+        text-align: center;
+        margin-top: 15px;
+        font-weight: 600;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>📦 CPH Calculator</h1>
+    <div class="subtitle">Cartons Per Hour</div>
+
+    <div class="card">
+
+        <label>Start Time</label>
+        <input type="time" id="start">
+
+        <label>End Time</label>
+        <input type="time" id="end">
+
+        <label>Cartons / Boxes Completed</label>
+        <input type="number" id="cartons" step="0.5" min="0" placeholder="Example: 10.5">
+
+        <label>Break 1 (minutes)</label>
+        <input type="number" id="break1" min="0" value="0">
+
+        <label>Break 2 (minutes)</label>
+        <input type="number" id="break2" min="0" value="0">
+
+        <label>Break 3 (minutes)</label>
+        <input type="number" id="break3" min="0" value="0">
+
+        <button onclick="calculate()">Calculate CPH</button>
+
+        <div id="error" class="error"></div>
+
+    </div>
+
+    <div class="card" id="results" style="display:none;">
+
+        <div class="detail">
+            <span>Total elapsed time</span>
+            <strong id="elapsed"></strong>
+        </div>
+
+        <div class="detail">
+            <span>Total breaks</span>
+            <strong id="breakTotal"></strong>
+        </div>
+
+        <div class="detail">
+            <span>Actual work time</span>
+            <strong id="workTime"></strong>
+        </div>
+
+        <div class="detail">
+            <span>Cartons / Boxes</span>
+            <strong id="cartonResult"></strong>
+        </div>
+
+        <div class="result">
+            <span id="cph"></span> CPH
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function calculate() {
+
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+    const cartons = parseFloat(document.getElementById("cartons").value);
+
+    const break1 = parseFloat(document.getElementById("break1").value) || 0;
+    const break2 = parseFloat(document.getElementById("break2").value) || 0;
+    const break3 = parseFloat(document.getElementById("break3").value) || 0;
+
+    const error = document.getElementById("error");
+
+    error.textContent = "";
+
+    if (!start || !end || isNaN(cartons)) {
+        error.textContent = "Please enter the start time, end time, and cartons.";
+        return;
+    }
+
+    let startMinutes =
+        parseInt(start.split(":")[0]) * 60 +
+        parseInt(start.split(":")[1]);
+
+    let endMinutes =
+        parseInt(end.split(":")[0]) * 60 +
+        parseInt(end.split(":")[1]);
+
+    // Allows work to cross midnight
+    if (endMinutes < startMinutes) {
+        endMinutes += 24 * 60;
+    }
+
+    const elapsedMinutes = endMinutes - startMinutes;
+
+    const totalBreaks = break1 + break2 + break3;
+
+    const workMinutes = elapsedMinutes - totalBreaks;
+
+    if (workMinutes <= 0) {
+        error.textContent = "Break time cannot be greater than the work period.";
+        return;
+    }
+
+    const cph = cartons / (workMinutes / 60);
+
+    document.getElementById("elapsed").textContent =
+        formatTime(elapsedMinutes);
+
+    document.getElementById("breakTotal").textContent =
+        totalBreaks + " min";
+
+    document.getElementById("workTime").textContent =
+        formatTime(workMinutes);
+
+    document.getElementById("cartonResult").textContent =
+        cartons;
+
+    document.getElementById("cph").textContent =
+        cph.toFixed(2);
+
+    document.getElementById("results").style.display = "block";
+}
+
+function formatTime(minutes) {
+
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    if (hours === 0) {
+        return mins + " min";
+    }
+
+    if (mins === 0) {
+        return hours + " hr";
+    }
+
+    return hours + " hr " + mins + " min";
+}
+
+</script>
+
+</body>
+</html>
