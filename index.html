@@ -77,7 +77,7 @@
         text-align: center;
         font-size: 28px;
         font-weight: 700;
-        margin-top: 10px;
+        margin-top: 20px;
     }
 
     .detail {
@@ -97,6 +97,12 @@
         margin-top: 15px;
         font-weight: 600;
     }
+
+    .break-title {
+        margin-top: 25px;
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
 </style>
 </head>
 
@@ -105,7 +111,10 @@
 <div class="app">
 
     <h1>📦 CPH Calculator</h1>
-    <div class="subtitle">Cartons Per Hour</div>
+
+    <div class="subtitle">
+        Cartons Per Hour
+    </div>
 
     <div class="card">
 
@@ -116,18 +125,61 @@
         <input type="time" id="end">
 
         <label>Cartons / Boxes Completed</label>
-        <input type="number" id="cartons" step="0.5" min="0" placeholder="Example: 10.5">
+        <input
+            type="number"
+            id="cartons"
+            step="0.5"
+            min="0"
+            placeholder="Example: 10.5"
+        >
+
+        <div class="break-title">
+            Breaks
+        </div>
 
         <label>Break 1 (minutes)</label>
-        <input type="number" id="break1" min="0" value="0">
+        <input
+            type="number"
+            id="break1"
+            min="0"
+            value="0"
+        >
 
         <label>Break 2 (minutes)</label>
-        <input type="number" id="break2" min="0" value="0">
+        <input
+            type="number"
+            id="break2"
+            min="0"
+            value="0"
+        >
 
         <label>Break 3 (minutes)</label>
-        <input type="number" id="break3" min="0" value="0">
+        <input
+            type="number"
+            id="break3"
+            min="0"
+            value="0"
+        >
 
-        <button onclick="calculate()">Calculate CPH</button>
+        <label>Break 4 (minutes)</label>
+        <input
+            type="number"
+            id="break4"
+            min="0"
+            value="0"
+        >
+
+        <label>Break 5 (minutes)</label>
+        <input
+            type="number"
+            id="break5"
+            min="0"
+            value="0"
+        >
+
+        <button onclick="calculate()">
+            Calculate CPH
+        </button>
 
         <div id="error" class="error"></div>
 
@@ -169,18 +221,39 @@ function calculate() {
 
     const start = document.getElementById("start").value;
     const end = document.getElementById("end").value;
-    const cartons = parseFloat(document.getElementById("cartons").value);
+    const cartons = parseFloat(
+        document.getElementById("cartons").value
+    );
 
-    const break1 = parseFloat(document.getElementById("break1").value) || 0;
-    const break2 = parseFloat(document.getElementById("break2").value) || 0;
-    const break3 = parseFloat(document.getElementById("break3").value) || 0;
+    const break1 = parseFloat(
+        document.getElementById("break1").value
+    ) || 0;
+
+    const break2 = parseFloat(
+        document.getElementById("break2").value
+    ) || 0;
+
+    const break3 = parseFloat(
+        document.getElementById("break3").value
+    ) || 0;
+
+    const break4 = parseFloat(
+        document.getElementById("break4").value
+    ) || 0;
+
+    const break5 = parseFloat(
+        document.getElementById("break5").value
+    ) || 0;
 
     const error = document.getElementById("error");
 
     error.textContent = "";
 
     if (!start || !end || isNaN(cartons)) {
-        error.textContent = "Please enter the start time, end time, and cartons.";
+
+        error.textContent =
+            "Please enter the start time, end time, and cartons.";
+
         return;
     }
 
@@ -192,23 +265,37 @@ function calculate() {
         parseInt(end.split(":")[0]) * 60 +
         parseInt(end.split(":")[1]);
 
-    // Allows work to cross midnight
+    // Allows the work period to cross midnight
     if (endMinutes < startMinutes) {
         endMinutes += 24 * 60;
     }
 
-    const elapsedMinutes = endMinutes - startMinutes;
+    const elapsedMinutes =
+        endMinutes - startMinutes;
 
-    const totalBreaks = break1 + break2 + break3;
+    // Add all five breaks together
+    const totalBreaks =
+        break1 +
+        break2 +
+        break3 +
+        break4 +
+        break5;
 
-    const workMinutes = elapsedMinutes - totalBreaks;
+    // Subtract breaks from total elapsed time
+    const workMinutes =
+        elapsedMinutes - totalBreaks;
 
     if (workMinutes <= 0) {
-        error.textContent = "Break time cannot be greater than the work period.";
+
+        error.textContent =
+            "Break time cannot be greater than the work period.";
+
         return;
     }
 
-    const cph = cartons / (workMinutes / 60);
+    // Calculate cartons per hour
+    const cph =
+        cartons / (workMinutes / 60);
 
     document.getElementById("elapsed").textContent =
         formatTime(elapsedMinutes);
@@ -225,13 +312,18 @@ function calculate() {
     document.getElementById("cph").textContent =
         cph.toFixed(2);
 
-    document.getElementById("results").style.display = "block";
+    document.getElementById("results").style.display =
+        "block";
 }
+
 
 function formatTime(minutes) {
 
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    const hours =
+        Math.floor(minutes / 60);
+
+    const mins =
+        minutes % 60;
 
     if (hours === 0) {
         return mins + " min";
